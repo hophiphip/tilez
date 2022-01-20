@@ -9,4 +9,11 @@ go run .
 ## API Routes
 | Method | Route | Description |
 |--------|:-----:|:-----------:|
-| `GET`  | `/img/:image/:x/:y/:zoom` | Retrieve image tile with provided zoom |
+| `GET`  | `/img/{image}/{x}/{y}/{zoom}` | Retrieve image tile with provided zoom |
+
+| Argument | Description |
+|:--------:|:-----------:|
+| `image`  | image name without extension |
+| `x`      | tile x position on a grid |
+| `y`      | tile y position on a grid |
+| `zoom`   | grid zoom level |
