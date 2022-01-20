@@ -12,6 +12,8 @@ import (
 	"os"
 )
 
+// TODO: Refactor
+
 func handleImage(ctx *gin.Context) {
 
 	// parse args
