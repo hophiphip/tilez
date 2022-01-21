@@ -20,7 +20,7 @@ var testCases = []TestCase{
 
 func TestNewImage(t *testing.T) {
 	for _, testCase := range testCases {
-		parsedValue, err := New(testCase.Args.X, testCase.Args.Y, testCase.Args.Zoom)
+		parsedValue, err := New("test.png", testCase.Args.X, testCase.Args.Y, testCase.Args.Zoom)
 
 		if err != nil {
 			t.Error(err)

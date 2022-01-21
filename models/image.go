@@ -13,78 +13,112 @@ type Image struct {
 	Zoom int `json:"zoom"`
 
 	ImagePath string `json:"image_path"`
-	// TODO: Add the image itself (a file) max/min x,y,zoom and improve parser/constructor
+
+	// TODO: Add the image itself (imge.Image) max/min x,y,zoom and improve parser/constructor
 }
 
-const minX = 0
-const maxX = 3
-const minY = 0
-const maxY = 3
+// TODO: These values must be initialized during image border parsing
+const zoom1 = 1
+const zoom2 = 2
+const zoom3 = 4
+
+const imageFolderPrefix = "img"
 
 func New(image, x, y, zoom string) (Image, error) {
+	img := Image{}
 
-	// parse Zoom
-	intZoom, err := strconv.Atoi(zoom)
-	if err != nil {
+	if err := img.initZoom(zoom); err != nil {
 		return Image{}, err
 	}
 
-	switch intZoom {
-	case 1:
-	case 2:
-	case 4:
+	if err := img.initX(x); err != nil {
+		return Image{}, err
+	}
+
+	if err := img.initY(y); err != nil {
+		return Image{}, err
+	}
+
+	if err := img.initImagePath(image); err != nil {
+		return Image{}, err
+	}
+
+	return img, nil
+}
+
+// initZoom check if provided Zoom value is correct and if it is then set it
+func (img *Image) initZoom(_zoom string) error {
+	zoom, err := strconv.Atoi(_zoom)
+
+	if err != nil {
+		return err
+	}
+
+	switch zoom {
+
+	case zoom1:
+		fallthrough
+	case zoom2:
+		fallthrough
+	case zoom3:
 		{
-			/* DO NOTHING */
+			img.Zoom = zoom
+			return nil
 		}
+
 	default:
-		return Image{}, fmt.Errorf("zoom is not in [1, 2, 4]")
+		return fmt.Errorf("zoom is not in [1, 2, 4]")
 	}
+}
 
-	// parse X
-	intX, err := strconv.Atoi(x)
+// initX check if provided X value is correct and if it is then set it
+func (img *Image) initX(_x string) error {
+	x, err := strconv.Atoi(_x)
+
 	if err != nil {
-		return Image{}, err
+		return err
 	}
 
-	if intX < minX && intX > maxX {
-		return Image{}, fmt.Errorf("x is not in [%d..%d]", minX, maxX)
+	if x < 0 || x >= img.Zoom {
+		return fmt.Errorf("x is not in [0..%d]", img.Zoom-1)
 	}
 
-	if intX >= intZoom {
-		return Image{}, fmt.Errorf("x: %d can not be greater than zoom: %d", intX, intZoom)
-	}
+	img.X = x
 
-	// parse Y
-	intY, err := strconv.Atoi(y)
+	return nil
+}
+
+// initY check if provided Y value is correct and if it is then set it
+func (img *Image) initY(_y string) error {
+	y, err := strconv.Atoi(_y)
+
 	if err != nil {
-		return Image{}, err
+		return err
 	}
 
-	if intY < minY && intY > maxY {
-		return Image{}, fmt.Errorf("y is not in [%d..%d]", minY, maxY)
+	if y < 0 || y >= img.Zoom {
+		return fmt.Errorf("y is not in [0..%d]", img.Zoom-1)
 	}
 
-	if intY >= intZoom {
-		return Image{}, fmt.Errorf("y: %d can not be greater than zoom: %d", intY, intZoom)
-	}
+	img.Y = y
 
-	// check if image exists
-	// TODO: Only .png supported for now
+	return nil
+}
 
-	imagePath := fmt.Sprintf("img/%s.png", image)
+// TODO: Add support for other extensions ? or mb. use vector images
+// initImagePath check if provided file does exist and if it is then set it
+func (img *Image) initImagePath(_imagePath string) error {
+	imagePath := fmt.Sprintf("%s/%s.png", imageFolderPrefix, _imagePath)
 
 	if _, err := os.Stat(imagePath); err != nil {
 		if errors.Is(err, os.ErrNotExist) {
-			return Image{}, err
+			return err
 		} else {
-			return Image{}, fmt.Errorf("could not access file")
+			return fmt.Errorf("could not access file")
 		}
 	}
 
-	return Image{
-		X:         intX,
-		Y:         intY,
-		Zoom:      intZoom,
-		ImagePath: imagePath,
-	}, nil
+	img.ImagePath = imagePath
+
+	return nil
 }
