@@ -2,12 +2,11 @@ package main
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"log"
 	"os"
-)
 
-const testImage = "test.png"
+	"github.com/gin-gonic/gin"
+)
 
 const defaultHost = "0.0.0.0"
 const defaultPort = "8080"
@@ -26,10 +25,7 @@ func main() {
 	router := gin.Default()
 	router.Use(CORSMiddleware())
 
-	api := router.Group("/img")
-	{
-		api.GET("/:image/:x/:y/:zoom", handleImage)
-	}
+	router.GET("/:image/:zoom/:x/:y", handleImage)
 
 	if err := router.Run(fmt.Sprintf("%s:%s", host, port)); err != nil {
 		log.Fatal(err)
