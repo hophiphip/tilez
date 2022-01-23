@@ -50,7 +50,7 @@ func handleImage(ctx *gin.Context) {
 	bounds := img.Bounds()
 
 	// NOTE: For now we suppose the image is square
-	newSize := (bounds.Max.X - bounds.Min.X) / parsedImage.Zoom
+	newSize := (bounds.Max.X - bounds.Min.X) / parsedImage.ZoomAsPowOf2()
 
 	newBounds := image.Rectangle{
 		Min: image.Point{

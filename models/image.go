@@ -3,6 +3,7 @@ package models
 import (
 	"errors"
 	"fmt"
+	"math"
 	"os"
 	"strconv"
 )
@@ -16,11 +17,6 @@ type Image struct {
 
 	// TODO: Add the image itself (imge.Image) max/min x,y,zoom and improve parser/constructor
 }
-
-// TODO: These values must be initialized during image border parsing
-const zoom1 = 1
-const zoom2 = 2
-const zoom3 = 4
 
 const imageFolderPrefix = "img"
 
@@ -54,21 +50,13 @@ func (img *Image) initZoom(_zoom string) error {
 		return err
 	}
 
-	switch zoom {
-
-	case zoom1:
-		fallthrough
-	case zoom2:
-		fallthrough
-	case zoom3:
-		{
-			img.Zoom = zoom
-			return nil
-		}
-
-	default:
-		return fmt.Errorf("zoom is not in [1, 2, 4]")
+	if zoom > 3 {
+		return fmt.Errorf("zoom value can not be grater than %d for now", 3)
 	}
+
+	img.Zoom = zoom
+
+	return nil
 }
 
 // initX check if provided X value is correct and if it is then set it
@@ -79,8 +67,8 @@ func (img *Image) initX(_x string) error {
 		return err
 	}
 
-	if x < 0 || x >= img.Zoom {
-		return fmt.Errorf("x is not in [0..%d]", img.Zoom-1)
+	if x < 0 || x >= img.ZoomAsPowOf2() {
+		return fmt.Errorf("x is not in [0..%d]", img.ZoomAsPowOf2()-1)
 	}
 
 	img.X = x
@@ -96,8 +84,8 @@ func (img *Image) initY(_y string) error {
 		return err
 	}
 
-	if y < 0 || y >= img.Zoom {
-		return fmt.Errorf("y is not in [0..%d]", img.Zoom-1)
+	if y < 0 || y >= img.ZoomAsPowOf2() {
+		return fmt.Errorf("y is not in [0..%d]", img.ZoomAsPowOf2()-1)
 	}
 
 	img.Y = y
@@ -121,4 +109,9 @@ func (img *Image) initImagePath(_imagePath string) error {
 	img.ImagePath = imagePath
 
 	return nil
+}
+
+// ZoomAsPowOf2 return zoom as a power of 2, for example [0,1,2] => [1,2,4]
+func (img *Image) ZoomAsPowOf2() int {
+	return int(math.Pow(2, float64(img.Zoom)))
 }
